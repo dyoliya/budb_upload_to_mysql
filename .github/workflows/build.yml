@@ -27,7 +27,7 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --onefile --name budb_upload_to_mysql gui.py
+          pyinstaller --onefile --windowed --name budb_upload_to_mysql gui.py
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
