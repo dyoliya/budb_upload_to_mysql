@@ -93,7 +93,7 @@ def load_mysql_config():
 def main(
     BOTTOMS_UP_FOLDER=DEFAULT_BOTTOMS_UP_FOLDER,
     sqlite_table="bottoms_up",
-    mysql_table="test_bottoms_up_contacts",
+    mysql_table="bottoms_up_contacts",
     checkpoint_file="checkpoint.txt",
     batch_size=10000,
     test_limit=None,
