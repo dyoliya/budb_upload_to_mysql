@@ -26,6 +26,39 @@
 - **Flexible Directory Handling**: Automatically detects the script/executable location and manages database folder creation.
 
 ---
+## 🧠 Logic Flow
+1. The app checks your setup first
+   - It confirms config/.env exists and contains MySQL connection values.
+   - It confirms the database folder exists.
+2. The app requires exactly one BUDB .db file
+   - The app looks for a single .db file inside the database folder.
+   - If none is found → it stops.
+   - If more than one is found → it stops and asks you to keep only one.
+3. The app connects to both databases
+   - It opens the BUDB .db file (SQLite).
+   - It connects to the target MySQL database using the .env credentials.
+4. The app resumes safely using a checkpoint
+   - If checkpoint.txt exists, the app reads the last uploaded SQLite id.
+   - Only rows with id greater than that value will be uploaded (so it won’t re-upload older rows).
+5. The app asks whether to clear old online data (optional)
+   - If the MySQL table already has rows, the app asks if you want to truncate (clear) it.
+   - If you choose Yes:
+     - the MySQL table is cleared, and
+     - the checkpoint is reset to 0 (upload restarts from the beginning).
+   - If you choose No:
+     - existing MySQL rows remain, and
+     - upload continues from the checkpoint.
+6. The app uploads records in batches
+   - The app reads rows from the .db file in groups (default 10,000 at a time).
+   - Each batch is inserted into the MySQL table.
+7. The app shows progress while uploading
+   - The progress bar updates during the upload (updates every 100 rows processed).
+8. If an upload batch fails, it stops
+   - The app logs which batch failed (starting id) and ends the process so the issue can be fixed before retrying.
+9. The app finishes with confirmation
+   - The app prints how many rows were inserted and shows the final row count in MySQL.
+
+---
 
 ## 📝 Requirements
 
