@@ -3,7 +3,7 @@
 # pyinstaller --onefile --windowed --name generate_owner_data gui.py --clean --add-data "main.py;." --hidden-import pandas --hidden-import tqdm
 # Tool: BUDB Upload MySQL
 # Developer: dyoliya
-# Created: 2025-04-25
+# Created: 2025-10-07
 
 # © 2025 dyoliya. All rights reserved.
 
@@ -44,6 +44,7 @@ column_mapping = {
     "Input: Zip Code": "input_zip_code",
     "County": "county",
     "State": "state",
+    "county_of_interest": "county_of_interest",
     "Contact Type": "contact_type",
     "ATTN": "attn",
     "# of Interests": "number_of_interests",
