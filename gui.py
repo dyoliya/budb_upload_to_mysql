@@ -6,7 +6,7 @@ import io
 import customtkinter as ctk
 import tkinter as tk 
 from tkinter import messagebox
-from main import main as budb_upload_to_mysql  # your main.py function
+from main import main as budb_upload_to_mysql
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
@@ -20,7 +20,7 @@ class MinimalToolUI(ctk.CTk):
             version = f.read().strip()
 
         self.title(f"BUDB Upload to MySQL {version}")
-        self.geometry("620x480")
+        self.geometry("480x620")
         self.configure(fg_color="#273946")
 
         # Dots animation
@@ -107,10 +107,29 @@ class MinimalToolUI(ctk.CTk):
         )
         self.message_label.pack(pady=5)
 
+        # Progress details frame
+        self.details_frame = ctk.CTkFrame(self, fg_color="#273946", corner_radius=0)
+        self.details_frame.pack(padx=40, pady=(5, 0), fill="x")
+
+        self.status_detail = ctk.CTkLabel(self.details_frame, text="Status: Waiting", text_color="#fff6de", anchor="w")
+        self.status_detail.pack(fill="x")
+
+        self.rows_detail = ctk.CTkLabel(self.details_frame, text="Processed: 0 / 0 rows", text_color="#fff6de", anchor="w")
+        self.rows_detail.pack(fill="x")
+
+        self.batch_detail = ctk.CTkLabel(self.details_frame, text="Batch Size: -", text_color="#fff6de", anchor="w")
+        self.batch_detail.pack(fill="x")
+
+        self.checkpoint_detail = ctk.CTkLabel(self.details_frame, text="Checkpoint: -", text_color="#fff6de", anchor="w")
+        self.checkpoint_detail.pack(fill="x")
+
+        self.elapsed_detail = ctk.CTkLabel(self.details_frame, text="Elapsed Time: 00:00:00", text_color="#fff6de", anchor="w")
+        self.elapsed_detail.pack(fill="x")
+
         # Progress bar
         self.progress = ctk.CTkProgressBar(
             self,
-            width=500,
+            width=300,
             fg_color="#444444",
             progress_color="#CB1F47"
         )
@@ -171,6 +190,13 @@ class MinimalToolUI(ctk.CTk):
     def refresh_all(self):
         self.message_label.configure(text="Waiting to start...")
         self.progress.set(0)
+
+        self.status_detail.configure(text="Status: Waiting")
+        self.rows_detail.configure(text="Processed: 0 / 0 rows")
+        self.batch_detail.configure(text="Batch Size: -")
+        self.checkpoint_detail.configure(text="Checkpoint: -")
+        self.elapsed_detail.configure(text="Elapsed Time: 00:00:00")
+
         self.dots_running = False
         if hasattr(self, "wait_popup"):
             self.close_wait_popup()
@@ -210,13 +236,31 @@ class MinimalToolUI(ctk.CTk):
         self.message_label.configure(text=message)
         self.update_idletasks()
 
-    def update_progress(self, fraction, filename=None):
+    def update_progress(
+        self,
+        fraction,
+        filename=None,
+        processed_rows=0,
+        total_rows=0,
+        batch_size=None,
+        checkpoint=None,
+        elapsed_time=None
+    ):
         self.progress.set(fraction)
-        self.message_label.configure(text=f"{int(fraction*100)}% completed")
+
+        percent = int(fraction * 100)
+        self.message_label.configure(text=f"{percent}% completed")
+
+        self.status_detail.configure(text=f"Status: Uploading... {percent}%")
+        self.rows_detail.configure(text=f"Processed: {processed_rows:,} / {total_rows:,} rows")
+        self.batch_detail.configure(text=f"Batch Size: {batch_size:,} rows" if batch_size else "Batch Size: -")
+        self.checkpoint_detail.configure(text=f"Checkpoint: ID > {checkpoint:,}" if checkpoint else "Checkpoint: -")
+        self.elapsed_detail.configure(text=f"Elapsed Time: {elapsed_time}" if elapsed_time else "Elapsed Time: 00:00:00")
+
         if filename and getattr(self, "wait_label", None) and self.wait_label.winfo_exists():
             self.wait_popup_filename = filename
             dots = "." * self.wait_popup_dots
-            short_name = os.path.basename(self.wait_popup_filename) 
+            short_name = os.path.basename(self.wait_popup_filename)
             self.wait_label.configure(text=f"Uploading{dots}\n{short_name}")
 
     # ---------------- Wait popup ----------------

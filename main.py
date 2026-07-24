@@ -1,6 +1,6 @@
 # -------------------------ABOUT --------------------------
 
-# pyinstaller --onefile --windowed --name generate_owner_data gui.py --clean --add-data "main.py;." --hidden-import pandas --hidden-import tqdm
+# pyinstaller --onefile --windowed --name budb_upload_to_mysql gui.py
 # Tool: BUDB Upload MySQL
 # Developer: dyoliya
 # Created: 2025-10-07
@@ -15,6 +15,7 @@ import os
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+import time
 
 # ----------------------- DIRECTORIES -----------------------
 def exe_dir():
@@ -74,7 +75,9 @@ column_mapping = {
     "email3": "email3",
     "email4": "email4",
     "email5": "email5",
-    "contact_id": "contact_id"
+    "contact_id": "contact_id",
+    "po_id": "po_id",
+    "ncop_id": "ncop_id"
 }
 
 def load_mysql_config():
@@ -175,6 +178,7 @@ def main(
 
     # --- Batch insert with checkpoint & progress ---
     processed_rows = 0
+    start_time = time.time()
     while True:
         if test_limit:
             remaining = test_limit - processed_rows
@@ -199,7 +203,19 @@ def main(
             processed_rows += 1
             if progress_callback and processed_rows % 100 == 0:
                 progress_fraction = processed_rows / total_rows
-                progress_callback(progress_fraction, sqlite_db_path)
+
+                elapsed_seconds = int(time.time() - start_time)
+                elapsed_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_seconds))
+
+                progress_callback(
+                    progress_fraction,
+                    sqlite_db_path,
+                    processed_rows=processed_rows,
+                    total_rows=total_rows,
+                    batch_size=batch_size,
+                    checkpoint=row[0],
+                    elapsed_time=elapsed_time
+                )
 
 
         # --- Update checkpoint ---
